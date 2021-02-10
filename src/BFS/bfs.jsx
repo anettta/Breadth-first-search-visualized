@@ -6,14 +6,17 @@ export default class BFS extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            hexSize: 20,
-            hexOrigin: { x: 350, y: 300 }
+            hexSize: 25, // changed from 20
+            hexOrigin: { x: 30, y: 30 }
         }
     }
+    
 
     componentWillMount() {
+        let hexParameters = this.getHexParameters();
         this.setState({
-            canvasSize: { canvasWidth: 800, canvasHeight: 600 }
+            canvasSize: { canvasWidth: 800, canvasHeight: 600 },
+            hexParameters: hexParameters
         })
     }
 
@@ -54,16 +57,56 @@ export default class BFS extends React.Component {
         ctx.closePath();
     }
 
+
+
     drawHexes() {
-        for(let r = 0; r <= 4; r++) {
-            for(let q = 0; q <= 4; q++) {
+        const { canvasWidth, canvasHeight } = this.state.canvasSize;
+        const { hexWidth, hexHeight, vertDist, horizDist } = this.state.hexParameters;
+        const hexOrigin = this.state.hexOrigin;
+        let qLeftSide = Math.round(hexOrigin.x/hexWidth) * 4;
+        let qRightSide = Math.round(canvasWidth - hexOrigin.x) / hexWidth * 2;
+        let rTopSide = Math.round(hexOrigin.y/(hexHeight/2));
+        let rBottomSide = Math.round((canvasHeight - hexOrigin.y)/(hexHeight/2));
+
+
+        var p = 0; // to determine even rows
+        for(let r = 0; r <= rBottomSide; r++){
+            if (r % 2 == 0 && r !== 0) {
+                p++;
+            }
+            for (let q = -qLeftSide; q <= qRightSide; q++) {
+                const { x, y } = this.hexToPixel(this.Hex(q-p, r))
+                if ((x > hexWidth/2 && x < canvasWidth - hexWidth/2) && (y > hexHeight/2 && y < canvasHeight - hexHeight/2)) {
+                    this.drawHex(this.canvasHex, this.Point(x,y));
+                    this.drawHexCoordinates(this.canvasHex, this.Point(x,y), this.Hex(q-p, r));
+
+                }
+            }
+        }
+
+        var n = 0; 
+        for(let r = -1; r >= rTopSide; r--){
+            if (r % 2 !== 0) {
+                n++;
+            }
+            for (let q = -qLeftSide; q <= qRightSide; q++) {
+                const { x, y } = this.hexToPixel(this.Hex(q+n, r))
+                if ((x > hexWidth/2 && x < canvasWidth - hexWidth/2) && (y > hexHeight/2 && y < canvasHeight - hexHeight/2)) {
+                    this.drawHex(this.canvasHex, this.Point(x,y));
+                    this.drawHexCoordinates(this.canvasHex, this.Point(x,y), this.Hex(q+n, r));
+                    
+                }
+            }
+        }
+
+        for(let r = -rTopSide; r <= rBottomSide; r++) {
+            for(let q = -qLeftSide; q <= qRightSide; q++) {
           
                 let center = this.hexToPixel(this.Hex(q,r));
-                this.drawHex(this.canvasHex, center);
-                this.drawHexCoordinates(this.canvasHex, center, this.Hex(q, r));
-                console.log(center)
-        
-
+                if ((center.x > hexWidth/2 && center.x < canvasWidth-hexWidth/2) && (center.y < canvasHeight - hexHeight/2)) {
+                 this.drawHex(this.canvasHex, center);
+                 this.drawHexCoordinates(this.canvasHex, center, this.Hex(q, r));
+                }
             }
         }
     }
@@ -84,6 +127,16 @@ export default class BFS extends React.Component {
         const ctx = canvasID.getContext("2d");
         ctx.fillText(h.q, center.x-10, center.y);
         ctx.fillText(h.r, center.x+7, center.y);
+    }
+
+
+    getHexParameters() {
+        let hexHeight = this.state.hexSize * 2;
+        let hexWidth = Math.sqrt(3)/2 * hexHeight;
+        let vertDist = hexHeight * 3/4;
+        let horizDist = hexWidth;
+        return { hexWidth, hexHeight, vertDist, horizDist }
+
     }
 
 
