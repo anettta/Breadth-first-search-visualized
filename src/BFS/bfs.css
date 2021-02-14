@@ -1,1 +1,5 @@
-
+canvas {
+  border: 1px solid yellowgreen;
+  position: absolute;
+  left: 0;
+}
