@@ -1,4 +1,17 @@
+body {
+  max-width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 canvas {
   position: absolute;
-  left: 0;
+  max-width: 100%;
+}
+
+h1,
+p {
+  margin: 40px;
+  text-align: center;
 }
